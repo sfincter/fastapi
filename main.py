@@ -84,7 +84,6 @@ class NewSpecialist(BaseModel):
 
 @app.post('/specialists')
 async def create_specialist(new_specialist: NewSpecialist):
-    """ Добавление специалиста + отправка обновлений через WebSocket """
     new_data = {
         'id': len(specialists) + 1,
         'role': new_specialist.role,
@@ -93,11 +92,15 @@ async def create_specialist(new_specialist: NewSpecialist):
     }
     specialists.append(new_data)
 
-    # Отправляем обновленный список через WebSockets
+    # Логируем перед отправкой
+    print("📡 Отправка обновлений через WebSocket:", specialists)
+
+    # Отправляем обновленный список клиентам
     for connection in active_connections:
         await connection.send_json(specialists)
 
     return {'success': True, 'message': 'Специалист добавлен'}
+
 
 
 
