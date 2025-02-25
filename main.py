@@ -18,11 +18,6 @@ async def sse():
     return EventSourceResponse(event_generator())
 
 
-# Настройка CORS
-origins = [
-    "https://fastapi-frontend-three.vercel.app",  # Разрешаем доступ с локального фронтенда
-]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://fastapi-frontend-three.vercel.app"],  # Разрешаем все домены
