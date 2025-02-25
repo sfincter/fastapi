@@ -12,10 +12,11 @@ app = FastAPI()
 async def sse():
     def event_generator():
         while True:
-            time.sleep(5)  # симуляция задержки
-            yield f"data: {str(specialists)}\n\n"
+            time.sleep(3)  # Задержка
+            yield f"data: {{'update': 'specialists list updated'}}\n\n"
     
     return EventSourceResponse(event_generator())
+
 
 
 app.add_middleware(
