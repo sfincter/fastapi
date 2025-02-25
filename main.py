@@ -14,10 +14,6 @@ app.add_middleware(
     allow_headers=["*"],  # Разрешаем все заголовки
 )
 
-specialists = [
-    {'id': 1, 'role': 'Психолог', 'name': 'Иван', 'email': 'ivan@dbtplus.ru'},
-    {'id': 2, 'role': 'Психотерапевт', 'name': 'Наталья', 'email': 'node@dbtplus.ru'},
-]
 
 @app.get('/specialists', tags=['Специалисты 👨‍⚕️'], summary='Показать всех специалистов')
 def all_specialists():
