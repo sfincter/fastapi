@@ -1,21 +1,27 @@
 from fastapi import FastAPI, HTTPException
+import asyncio
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import EventSourceResponse
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
-import time
 
 app = FastAPI()
 
 
-@app.get("/events")
-async def sse():
-    def event_generator():
-        while True:
-            time.sleep(3)  # Задержка
-            yield f"data: {{'update': 'specialists list updated'}}\n\n"
-    
-    return EventSourceResponse(event_generator())
+# Переменная для отслеживания изменений
+data_updated = False
+
+# Пример ручки для long polling
+@app.get("/long-poll")
+async def long_poll():
+    global data_updated
+
+    # Ждем, пока данные не изменятся
+    while not data_updated:
+        await asyncio.sleep(1)  # Пауза между проверками (если нужно)
+
+    # Как только данные обновляются, отправляем ответ
+    data_updated = False  # Сбрасываем флаг изменений
+    return {"specialists": specialists}
 
 
 
@@ -74,15 +80,16 @@ class NewSpecialist(BaseModel):
 
 
 # Ручка для добавления нового специалиста
-@app.post('/specialists')
-def create_specialist(new_specialist: NewSpecialist):
-    specialists.append({
-        'id': len(specialists) + 1,
-        'role': new_specialist.role,
-        'name': new_specialist.name,
-        'email': new_specialist.email,
-    })
-    return {'success': True, 'message': 'Специалист добавлен'}
+@app.post("/specialists")
+async def add_specialist(name: str, role: str):
+    new_id = len(specialists) + 1
+    specialists.append({"id": new_id, "name": name, "role": role})
+
+    # Помечаем, что данные обновились
+    global data_updated
+    data_updated = True
+
+    return {"message": "Специалист добавлен"}
 
 
 
