@@ -25,13 +25,13 @@ specialists = [
         'id': 1,
         'role': 'Психолог',
         'name': 'Иван',
-        'email': 'ivan@gmail.ru'
+        'email': 'ivan@dbtplus.ru'
     },
     {
         'id': 2,
         'role': 'Психотерапевт',
         'name': 'Наталья',
-        'email': 'node@gmail'
+        'email': 'node@dbtplus.ru'
     },
 ]
 
