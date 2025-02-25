@@ -1,10 +1,21 @@
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import EventSourceResponse
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
-from typing import List
+import time
 
 app = FastAPI()
+
+
+@app.get("/events")
+async def sse():
+    def event_generator():
+        while True:
+            time.sleep(5)  # симуляция задержки
+            yield f"data: {str(specialists)}\n\n"
+    
+    return EventSourceResponse(event_generator())
 
 
 # Настройка CORS
@@ -37,22 +48,6 @@ specialists = [
 ]
 
 
-# Храним список активных WebSocket соединений
-active_connections: List[WebSocket] = []
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    """ WebSocket для автоматического обновления списка специалистов. """
-    await websocket.accept()
-    active_connections.append(websocket)
-
-    try:
-        while True:
-            await websocket.receive_text()  # Ожидание сообщений (не используется)
-    except:
-        active_connections.remove(websocket)
-
-
 
 @app.get('/specialists', tags=['Специалисты 👨‍⚕️'], summary='Показать всех специалистов')
 def all_specialists():
@@ -82,23 +77,15 @@ class NewSpecialist(BaseModel):
 
 
 
+# Ручка для добавления нового специалиста
 @app.post('/specialists')
-async def create_specialist(new_specialist: NewSpecialist):
-    new_data = {
+def create_specialist(new_specialist: NewSpecialist):
+    specialists.append({
         'id': len(specialists) + 1,
         'role': new_specialist.role,
         'name': new_specialist.name,
         'email': new_specialist.email,
-    }
-    specialists.append(new_data)
-
-    # Логируем перед отправкой
-    print("📡 Отправка обновлений через WebSocket:", specialists)
-
-    # Отправляем обновленный список клиентам
-    for connection in active_connections:
-        await connection.send_json(specialists)
-
+    })
     return {'success': True, 'message': 'Специалист добавлен'}
 
 
@@ -110,4 +97,4 @@ def home():
 
 
 if __name__ == '__main__':
-    uvicorn.run('main:app', reload=True)
+    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=True)
