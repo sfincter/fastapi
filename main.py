@@ -9,7 +9,7 @@ app = FastAPI()
 
 # Настройка CORS
 origins = [
-    "http://localhost:3000",  # Разрешаем доступ с локального фронтенда
+    "https://fastapi-frontend-three.vercel.app",  # Разрешаем доступ с локального фронтенда
 ]
 
 app.add_middleware(
