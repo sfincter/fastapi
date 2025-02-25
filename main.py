@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
+from typing import List
 
 app = FastAPI()
 
@@ -36,6 +37,23 @@ specialists = [
 ]
 
 
+# Храним список активных WebSocket соединений
+active_connections: List[WebSocket] = []
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """ WebSocket для автоматического обновления списка специалистов. """
+    await websocket.accept()
+    active_connections.append(websocket)
+
+    try:
+        while True:
+            await websocket.receive_text()  # Ожидание сообщений (не используется)
+    except:
+        active_connections.remove(websocket)
+
+
+
 @app.get('/specialists', tags=['Специалисты 👨‍⚕️'], summary='Показать всех специалистов')
 def all_specialists():
     return specialists
@@ -64,15 +82,22 @@ class NewSpecialist(BaseModel):
 
 
 
-@app.post('/specialists', tags=['Специалисты 👨‍⚕️'], summary='Добавить специалиста')
-def create_specialist(new_specialist: NewSpecialist):
-    specialists.append ({
+@app.post('/specialists')
+async def create_specialist(new_specialist: NewSpecialist):
+    """ Добавление специалиста + отправка обновлений через WebSocket """
+    new_data = {
         'id': len(specialists) + 1,
         'role': new_specialist.role,
         'name': new_specialist.name,
         'email': new_specialist.email,
-    })
-    return {'success':True, 'message': 'Специалист добавлен'}
+    }
+    specialists.append(new_data)
+
+    # Отправляем обновленный список через WebSockets
+    for connection in active_connections:
+        await connection.send_json(specialists)
+
+    return {'success': True, 'message': 'Специалист добавлен'}
 
 
 
