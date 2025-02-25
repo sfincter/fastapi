@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 app = FastAPI()
 
@@ -54,6 +54,13 @@ class NewSpecialist(BaseModel):
     role: str
     name: str
     email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_domain(cls, value: str):
+        if not value.endswith("@dbtplus.ru"):
+            raise ValueError("Email должен заканчиваться на @dbtplus.ru")
+        return value
 
 
 
