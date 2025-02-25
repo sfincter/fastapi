@@ -1,8 +1,24 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
+
+
+# Настройка CORS
+origins = [
+    "http://localhost:3000",  # Разрешаем доступ с локального фронтенда
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Список разрешенных доменов
+    allow_credentials=True,
+    allow_methods=["*"],  # Разрешаем все HTTP методы
+    allow_headers=["*"],  # Разрешаем все заголовки
+)
+
 
 specialists = [
     {
