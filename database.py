@@ -11,5 +11,5 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Функция для создания всех таблиц (использует модели из models.py)
 def create_tables():
-    from models import User
-    User.metadata.create_all(bind=engine)
+    from models import Base
+    Base.metadata.create_all(bind=engine)
