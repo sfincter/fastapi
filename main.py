@@ -18,25 +18,19 @@ app.add_middleware(
 # Берем URL из переменной окружения
 DATABASE_URL = "postgres://eu-central-1.db.thenile.dev/getbetterDB"
 
-try:
-    # Подключение через URL
-    conn = psycopg2.connect(DATABASE_URL)
-    print("✅ Успешное подключение к NileDB!")
 
-    # Создаем курсор
-    cur = conn.cursor()
-
-    # Проверяем соединение
-    cur.execute("SELECT version();")
-    result = cur.fetchone()
-    print("PostgreSQL версия:", result)
-
-    # Закрываем соединение
-    cur.close()
-    conn.close()
-
-except Exception as e:
-    print("❌ Ошибка подключения:", e)
+@app.get('/')
+def check_db_connection():
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("SELECT version();")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return {"message": "✅ БД подключена"}
+    except Exception as e:
+        return {"error": f"❌ Ошибка подключения: {e}"}
 
 
 specialists = [
@@ -87,10 +81,6 @@ def delete_specialist(spec_id: int):
             specialists = [s for s in specialists if s['id'] != spec_id]
             return {'success': True, 'message': f'Специалист с ID {spec_id} удален'}
     raise HTTPException(status_code=404, detail='Специалист не найден')
-
-@app.get('/', summary='Главная ручка', tags=['Основные ручки'])
-def home():
-    return 'Hello from fastapi'
 
 if __name__ == '__main__':
     uvicorn.run('main:app', reload=True)
