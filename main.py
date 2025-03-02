@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import psycopg.pq
+import psycopg2
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
 
@@ -20,7 +20,7 @@ DATABASE_URL = "postgres://eu-central-1.db.thenile.dev/getbetterDB"
 
 try:
     # Подключение через URL
-    conn = psycopg.connect(DATABASE_URL)
+    conn = psycopg2.connect(DATABASE_URL)
     print("✅ Успешное подключение к NileDB!")
 
     # Создаем курсор
