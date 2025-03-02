@@ -26,17 +26,17 @@ def create_tables():
     from models import Base
     Base.metadata.create_all(bind=database)
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def startup(app: FastAPI):
     try:
-        await database.connect()  # Подключаемся к базе данных
-        create_tables()  # Создание таблиц при запуске
+        await database.connect()
+        create_tables() 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при подключении или создании таблиц: {str(e)}")
 
-@app.on_event("shutdown")
-async def shutdown():
-    await database.disconnect()  # Отключаемся от базы данных
+@asynccontextmanager
+async def shutdown(app: FastAPI):
+    await database.disconnect()  
 
 @app.get("/")
 def check_db():
