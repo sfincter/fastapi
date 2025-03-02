@@ -16,7 +16,7 @@ app.add_middleware(
 )
 
 # Берем URL из переменной окружения
-DATABASE_URL = "postgres://eu-central-1.db.thenile.dev/getbetterDB"
+DATABASE_URL = "postgres://01955629-3eff-7fa2-b9ec-59979ded6f4f:7cbeeccc-cde6-46e8-9f9b-b42bc7adc5f1@eu-central-1.db.thenile.dev/getbetterDB"
 
 
 @app.get('/')
