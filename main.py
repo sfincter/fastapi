@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import psycopg
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
 
@@ -13,6 +14,30 @@ app.add_middleware(
     allow_methods=["*"],  # Разрешаем все HTTP методы
     allow_headers=["*"],  # Разрешаем все заголовки
 )
+
+# Берем URL из переменной окружения
+DATABASE_URL = "postgres://eu-central-1.db.thenile.dev/getbetterDB"
+
+try:
+    # Подключение через URL
+    conn = psycopg.connect(DATABASE_URL)
+    print("✅ Успешное подключение к NileDB!")
+
+    # Создаем курсор
+    cur = conn.cursor()
+
+    # Проверяем соединение
+    cur.execute("SELECT version();")
+    result = cur.fetchone()
+    print("PostgreSQL версия:", result)
+
+    # Закрываем соединение
+    cur.close()
+    conn.close()
+
+except Exception as e:
+    print("❌ Ошибка подключения:", e)
+
 
 specialists = [
     {'id': 1, 'role': 'Психолог', 'name': 'Иван', 'email': 'ivan@dbtplus.ru'},
