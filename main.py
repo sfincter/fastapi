@@ -83,4 +83,4 @@ def delete_specialist(spec_id: int):
     raise HTTPException(status_code=404, detail='Специалист не найден')
 
 if __name__ == '__main__':
-    uvicorn.run('main:app', reload=True)
+    uvicorn.run('main:app', reload=True) 
