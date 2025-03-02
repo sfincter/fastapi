@@ -3,13 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
-from database import create_tables
 
 app = FastAPI()
-
-@app.on_event("startup")
-def startup():
-    create_tables()
 
 # Настройка CORS
 app.add_middleware(
@@ -20,9 +15,22 @@ app.add_middleware(
     allow_headers=["*"],  # Разрешаем все заголовки
 )
 
-@app.get("/")
+# Берем URL из переменной окружения
+DATABASE_URL = "postgres://01955629-3eff-7fa2-b9ec-59979ded6f4f:7cbeeccc-cde6-46e8-9f9b-b42bc7adc5f1@eu-central-1.db.thenile.dev/getbetterDB"
+
+
+@app.get('/')
 def check_db_connection():
-    return {"message": "✅ БД подключена и таблицы созданы"}
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+        cur.execute("SELECT version();")
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return {"message": "✅ БД подключена"}
+    except Exception as e:
+        return {"error": f"❌ Ошибка подключения: {e}"}
 
 
 specialists = [
