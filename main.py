@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import psycopg2
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database import create_tables
 
 app = FastAPI()
 
@@ -15,22 +17,24 @@ app.add_middleware(
     allow_headers=["*"],  # Разрешаем все заголовки
 )
 
-# Берем URL из переменной окружения
 DATABASE_URL = "postgres://01955629-3eff-7fa2-b9ec-59979ded6f4f:7cbeeccc-cde6-46e8-9f9b-b42bc7adc5f1@eu-central-1.db.thenile.dev/getbetterDB"
 
+engine = create_engine(DATABASE_URL)  # Подключаемся к БД
 
-@app.get('/')
-def check_db_connection():
-    try:
-        conn = psycopg2.connect(DATABASE_URL)
-        cur = conn.cursor()
-        cur.execute("SELECT version();")
-        result = cur.fetchone()
-        cur.close()
-        conn.close()
-        return {"message": "✅ БД подключена"}
-    except Exception as e:
-        return {"error": f"❌ Ошибка подключения: {e}"}
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)  # Создаём сессию
+
+def create_tables():
+    from models import Base
+    Base.metadata.create_all(bind=engine)
+
+
+@app.on_event("startup")
+def startup():
+    create_tables()  # Создание таблиц при запуске
+
+@app.get("/")
+def check_db():
+    return {"message": "✅ БД подключена и таблицы созданы"}
 
 
 specialists = [
