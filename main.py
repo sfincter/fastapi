@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from database import create_tables
 from databases import Database
 
-app = FastAPI(lifespan=lifespan)
+app: FastAPI = FastAPI(lifespan=lifespan)
 
 # Настройка CORS
 app.add_middleware(
