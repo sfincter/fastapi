@@ -2,8 +2,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from pydantic import BaseModel, EmailStr, field_validator
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from database import create_tables
 from databases import Database
 
